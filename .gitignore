@@ -1,0 +1,8 @@
+.DS_Store
+skills/
+prototype/AGENTS.md
+prototype/node_modules/
+prototype/dist/
+prototype/*.png
+prototype/qa-*.html
+*.log
