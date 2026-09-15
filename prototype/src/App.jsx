@@ -20,7 +20,7 @@ const PROBLEMS = [
     next: "内外统一走 MCP，新增一次、修复一次，两边受益。" },
 ];
 const STEPS = ["选择客户端", "完成连接", "首次查询"];
-const CLIENTS = ["Codex", "Claude", "Cursor"];
+const CLIENTS = ["Codex", "Claude", "Others"];
 const SCENARIOS = [
   { id: "success", label: "正常连接" },
   { id: "key-error", label: "密钥错误" },
