@@ -1,84 +1,57 @@
-# AInvest MCP v2 改版原型 · QA
+# AInvest MCP 原型改版 · 验收
 
-> 验收日期：2026-08-31
-> 结论范围：静态方案原型与方案口径通过；不代表拟议 MCP 域名、OAuth 或新增 API 已上线。
+日期：2026-09-15
+**final result: passed**
 
-## 验收基线
+## 验收依据
 
-- 视觉基线：沿用旧原型的绿 / 蓝 / 白企业设计语言、Noto Sans SC 和 Phosphor 图标；本次重构信息架构，不做旧页面逐像素复刻。
-- 核心用户任务：先看懂“现在的问题 / 怎么改”，再核对完整能力目录、目标工具面、权限、上线顺序和接入示意。
-- 桌面视口：`1280 × 720`。
-- 移动视口：`390 × 844`。
-- 本地预览：`http://127.0.0.1:5173/`。
+- 已批准目标：面向内部评审，保留白绿视觉，收敛为当前问题、连接体验、统一 MCP、推进步骤四部分；本报告记录本地验收，不包含后端实施。
+- 原视觉基线：`qa-before-1280.png`，从修改前本地页面捕获。旧页面仅作为字体、配色和组件语言参考；布局、信息密度与文案按本轮已批准方案重构，不做旧页面逐像素复刻。
+- 新首屏：`qa-after-1280.png`。请求视口均为 1280 × 900，浏览器导出的源图和结果图均为 1265 × 889 像素；原尺寸并排，无密度缩放。
+- 同屏比较：`qa-before-after-comparison.png`（2550 × 889）。完整页面：`qa-page-desktop.png`、`qa-page-mobile.png`。
+- 聚焦检查：连接成功、密钥错误、服务异常分别见 `qa-demo-success-1280.png`、`qa-demo-key-error-1280.png`、`qa-demo-service-error-1280.png`，用于检查小字、步骤和结果状态。
+- 手机截图：`qa-mobile-390.png`、`qa-mobile-service-error.png`、`qa-mobile-unified.png`；平板截图：`qa-tablet-768.png`。
 
-## 事实与覆盖检查
+## 视觉与内容检查
 
-| 声明 | 验收结果 |
+| 检查面 | 结果 |
 | --- | --- |
-| 官方 OpenAPI 24 项 | `OFFICIAL_API_OPERATIONS.length === 24` |
-| 现网直接映射 10 / 24 | 6 项 full + 4 项 partial；覆盖率 41.7% |
-| 现网完全缺失 14 项 | 14 项 `currentMcp=missing` |
-| 官方能力 v2 迁移状态 | 3 项 `b_side_mapped`、8 项 `legacy_compat`、13 项 `blocked` |
-| 二期 B 端直连 | `B_SIDE_ROUTES.length === 5`；3 条 `index-api` + 2 条 `quoteag` |
-| B 端固定传输 | `apikey` + `X-Auth-ProgId: 7080`；JSON body；具体私网 base 不进入前端 bundle |
-| 内部数据候选 13 项 | 5 项 implemented + 8 项“文档 active、运行/授权待验证” |
-| 不可用 / 废弃 3 项 | 单独目录展示，均无 targetTool，不可调用 |
-| 内部场景模板 | `validate_templates.py`：36 / 36 通过 |
-| 指标目录 | 明确写为 2026-06-09 本地快照；1,537 行、1,279 个唯一指标，不声称实时 |
+| 字体与层级 | 保留 Noto Sans SC、中文系统回退字体；标题、说明、步骤与辅助标签层次清楚；窄屏标题已平衡换行。 |
+| 间距与布局 | 四部分统一网格与节奏；桌面双列连接区、手机单列连接区；320、390、768、1280px 均无页面横向溢出。 |
+| 颜色与状态 | 保留白绿配色；绿色为成功，红色为认证失败，琥珀色为服务异常；错误同时使用文字说明。 |
+| 图片与图标 | 继续使用 Phosphor 图标和原文字品牌；无新增位图、假数据图表或装饰图。架构用可访问的文字节点表达。 |
+| 文案与事实 | 正文 749 个汉字；当前实测与未来目标分开，11 个工具不等于所有接口可用；明确官网已有 llms.txt，全部 Index API 开放是目标。 |
 
-已运行 Node 目录断言，验证 40 个目录条目 ID 唯一；官方 24 项与内部 13 项都有独立 v2 迁移状态。另验证 5 条 B 端路由 ID 唯一、endpoint family 与 key alias 固定对应，且只有 `b_side_mapped` 能进入 v2 执行面。
+原首屏的覆盖率仪表盘、接口清单、内部路由、权限表和工期已移除。旧能力清单模块已删除。文档、网页和 README 均强调：skills 如保留，只负责编排；内外数据调用共用 MCP。
 
-## 浏览器交互检查
+## 交互验证
 
-- 首屏明确区分现网与 v2 目标；拟议地址显示 `status: proposed`。
-- 架构区明确展示“一期兼容层 / 二期主数据面”，二期链路为 Hosted MCP → B 端路由器 → APISIX，不再经过一期 OpenAPI。
-- B 端路由表完整展示 5 条 POST path、3 / 2 key 分组和 `X-Auth-ProgId: 7080`，并标明“仅服务端”。
-- 目录搜索 `candles` 后显示 `1 / 24`，详情弹窗同时展示一期参数漂移与 v2 `b_side_mapped` 状态。
-- 切换“内部数据候选”并选择“只看缺口”后显示 `8 / 13`；这些项不会进入 v2 `tools/list`。
-- 官方 / 内部 / 不可用三个 tab 使用 `tablist/tab/tabpanel`、`aria-selected`、roving `tabIndex`，并支持方向键、Home 与 End。
-- 详情弹窗支持可访问名称、Esc、关闭按钮、Tab / Shift+Tab 焦点循环、焦点返还和背景滚动锁。
-- 客户端切换到 DeepSeek 后，function bridge 示例调用已映射的 `multiKline`，默认已选择所需 `catalog.read + marketdata.read`，不再调用阻塞的 `getStockProfile`。
-- 复制配置后显示 live status；配置只包含外部 OAuth/PAT 结构，不含 B 端 key、Cookie、userid 或 sessionid。
-- 桌面和移动端都无页面级横向溢出：`pageScrollWidth === clientWidth`。
-- 最终浏览器 console：0 条 error / warn。
+在 Codex 内置浏览器进行真实页面操作：
 
-## 视觉检查
+- 选择 Claude 后，连接确认页显示所选客户端；Codex、Claude、Cursor 为本地示例选择。
+- 正常流程：选择客户端 → 连接 → “数据查询仍待验证” → 查询 AAPL → Apple / NASDAQ / 股票固定结果。
+- 密钥错误：停留在第二步，不出现认证通过；更换示例密钥后进入第三步，仍需单独执行查询。
+- 服务异常：认证保留，查询显示服务端 500 和重试操作，不显示空结果；模拟恢复后返回成功结果。
+- 切换场景重置步骤；返回连接设置、返回客户端、重新开始均可用。
+- 连续 Tab / Enter 可完成选择后的连接步骤，切换后焦点移到新标题或错误说明，初次加载不抢焦点。
+- 四个导航锚点及首屏 CTA 可用；外链保留官网文档和 llms.txt 地址。
+- 手机可操作演示，异常提示与恢复按钮无裁切。
+- 浏览器控制台：0 条 warning / error。
 
-- 桌面首屏覆盖声明、主标题和行动按钮层级清楚；修复了“完整、安全”被拆成单字换行的问题。
-- “现在 / 怎么改”卡片能并排比较，P0 / P1 优先级和证据行不抢主文案。
-- 能力目录在桌面使用表格，在移动端改成完整卡片行；说明和目标工具未被隐藏。
-- 工具面只展示 B 端已映射工具、本地 resolver/catalog 和受控 B 端 router；官方候选工具保留在目录但不进入 `tools/list`。
-- 目标架构、统一返回、路线图和接入配置都有清晰的 current / proposed 边界。
-- 390px 移动端顶栏、首屏、目录、客户端卡和筛选控件无遮挡。
-- 图标全部来自同一 Phosphor 系列；没有 emoji、手工 SVG、CSS 假图或占位资产。
-- 支持键盘 focus ring、skip link 与 `prefers-reduced-motion`。
+## 已修复问题与复核
 
-## 构建与测试
+1. **[P2] 步骤切换丢失键盘焦点。** 独立代码审核发现原按钮卸载后焦点丢失。增加步骤标题与错误提示的焦点管理；连续 Tab / Enter 验证通过，焦点分别落在新连接标题、查询标题、错误提示上。见成功/错误状态截图。
+2. **[P2] 320px 窄屏横向溢出与标题尾字换行。** 原页面最小宽度与浏览器滚动条叠加，`scrollWidth=320`、`clientWidth=305`。移除根元素固定最小宽度、平衡标题换行后，两者均为 305。`qa-narrow-comparison.png` 将修复前后截图原尺寸并排（各 305 × 705），横向滚动条消失。
+3. 手机首屏说明按完整短句换行，避免少量尾字孤立在下一行。
 
-- `npm run build`：通过；生成 `dist/client/index.html`、`dist/server/index.js` 和 `dist/.openai/hosting.json`。
+以上问题已完成修复后的页面检查，无未解决 P0/P1/P2。
+
+## 构建与边界
+
+- `npm run build`：通过。
 - `npm run test:sites`：4 / 4 通过。
-- API catalog 计数与唯一性断言：通过。
-- B 端 transport / route / key-family 断言：通过。
-- `skills/ainvest-openapi-quote/scripts/validate_templates.py`：36 / 36 通过。
-
-## 已修复问题
-
-- [P1] 首屏强调词在 1280px 下被拆成单字换行：为强调短语增加不可拆分规则。
-- [P1] 官方 API 详情的 scope 曾由中文分组自动拼接成 `市场数据.read`：改为显式 group → OAuth scope 映射。
-- [P1] 一期 `currentMcp` 曾被误用为二期可调用状态：已新增独立 `v2Migration` 并以其控制筛选、徽标和注册结果。
-- [P1] 前端曾包含具体 B 端私网 base：现已从 bundle 移除，只显示抽象的“B 端 APISIX”。
-- [P1] Function Bridge 曾示例调用阻塞的 `getStockProfile`：已改为 `b_side_mapped` 的 `multiKline`。
-- [P2] 旧 QA 仍描述“10 个 MVP 工具”和旧接入向导：本文件已按 v2 方案完全重写。
-
-## 仍属生产阻塞项
-
-- 刷新并去重指标目录，修复 171 个双端点指标被压成单 endpoint 的生成逻辑。
-- 为期权补独立 resolver；当前 marketcode 数据源的期权枚举为 0。
-- 补齐 PyYAML 等依赖清单、live contract tests、交易所日历和确定性 catalog 生成。
-- 完成数据许可、entitlement、OAuth、限流、SLO 和正式公网域名评审。
-- 逐项验证 8 个 legacy active_unwrapped 接口；未通过门禁前只能标为“待验证”，不能宣称已对外上线。
-- 为 8 个 `legacy_compat` 与 13 个 `blocked` 官方 operation 补齐获批 B 端等价路由；完成前不得进入二期执行面。
-
-## 最终结论
-
-`passed`：静态 v2 方案原型已改为 B 端直连决策，交互、响应式布局、5 条路由映射与 current / proposed 边界通过。生产 MCP 实现仍需按 P0–P2 路线图建设。
+- `git diff --check`：通过。
+- 托管构建产物存在：`dist/client/index.html`、`dist/server/index.js`、`dist/.openai/hosting.json`。
+- 原托管配置、Worker、打包脚本、托管测试文件未修改。
+- 前端没有真实请求逻辑或凭据输入框；演示只使用本地固定示例，不代表真实账号连接。
+- 部署沿用仓库 GitHub Pages 工作流，发布结果以对应 GitHub Actions 记录为准。真实 MCP 后端、完整 Index API 覆盖和生产客户端接入仍是后续工作，不在本次验收范围。
